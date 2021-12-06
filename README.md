@@ -7,7 +7,7 @@ Siganal is a simple to use pub-sub framework. It is designed to allow you to sep
 Use Nuget to install the latest version 
 
 ```bash
-Install-Package Signals
+Install-Package Signals-pubsub
 ```
 
 ## Usage
@@ -60,6 +60,8 @@ public class BookDetailsHandler : SignalHandler<BookPriceSignal>
 
 finally you can send a message send a message 
 ```csharp
+// inject a version of ISignalProcessor , called signalProcessor 
+
 var signal = await signalProcessor.Process(new BookPriceSignal(id));
 var bookDetails = signal.BookDetails;
 ```
