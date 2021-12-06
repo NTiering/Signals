@@ -1,0 +1,19 @@
+﻿@model Signals.MvcExample.Data.Book[]
+
+@{
+    ViewData["Title"] = "Book Price Example";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Signal Example</h1>
+</div>  
+    <ul>
+        @foreach (var book in Model)
+        {
+            <li>@book <a href="/home/price/@book.Id">View Price</a></li>
+        }
+    </ul>
+
+<a href="/home/workflows">Workflows</a>
+
+

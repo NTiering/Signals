@@ -1,0 +1,40 @@
+﻿@model IDictionary<Type, Type[]>
+
+@{
+    ViewData["Title"] = "WorkFlows";
+}
+
+<h1>WorkFlows</h1>
+
+<div>
+  
+    <dl class="row">
+        @foreach (var k in Model.Keys)
+        {
+            var first = true;
+            <dt class="col-sm-2">
+
+            </dt>
+            <dd class="col-sm-10">
+            </dd>
+            foreach (var v in Model[k])
+            {
+                <dt class="col-sm-2">
+                    @if (first)
+                    {
+                        first = false;
+                        <text>
+                            @k.Name
+                        </text>
+                    }
+                </dt>
+                <dd class="col-sm-10">
+                    @v.Name
+                </dd>
+            }
+        }
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

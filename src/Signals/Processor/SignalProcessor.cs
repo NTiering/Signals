@@ -28,12 +28,13 @@ namespace Signals.Processor
 
         public IDictionary<Type, Type[]> WorkFlows => signalHandlers.ToDictionary(x => x.Key, x => x.Value.Select(y => y.GetType()).ToArray());
 
-        public async Task Process<T>(T signal) where T : ISignal
+        public async Task<T> Process<T>(T signal) where T : ISignal
         {
             await Process(signal, new CancellationToken());
+            return signal;
         }
 
-        public async Task Process<T>(T signal, CancellationToken token) where T : ISignal
+        public async Task<T> Process<T>(T signal, CancellationToken token) where T : ISignal
         {
             if (signal == null) throw new ArgumentNullException(nameof(signal));
             if (NoHandlersPresent<T>()) throw new InvalidOperationException($"No handlers found for Type of {typeof(T).FullName}");
@@ -41,6 +42,8 @@ namespace Signals.Processor
             await RunStartPipelineHandlers(signal, token);
             await RunSignalProcessors(signal, token);
             await RunEndPipelineHandlers(signal, token);
+
+            return signal;
         }
 
         private async Task RunStartPipelineHandlers<T>(T signal, CancellationToken token) where T : ISignal
