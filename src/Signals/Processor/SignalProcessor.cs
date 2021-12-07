@@ -74,9 +74,14 @@ namespace Signals.Processor
 
             foreach (var handler in handlers)
             {
-                ran.Add(handler);
+                if (signal.HandlersToSkip.OrEmpty().Contains(handler.GetType()))
+                {
+                    continue;
+                }
+
                 try
                 {
+                    ran.Add(handler);
                     await handler.Process(signal, context, token);
                     context.StepCount++;
 
@@ -89,6 +94,7 @@ namespace Signals.Processor
             }
 
             if (exception == null) return;
+            context.Exception = exception;
             ran.Reverse();
             foreach (var handler in ran)
             {

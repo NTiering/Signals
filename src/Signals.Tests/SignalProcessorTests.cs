@@ -5,6 +5,7 @@ using Signals.Handlers;
 using Signals.Pipelines;
 using Signals.Processor;
 using System;
+using System.Collections;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,7 +93,7 @@ namespace Signal.Tests
             {
                 await target.Process(signal, new CancellationToken());
             }
-            catch (Exception e)
+            catch 
             {
 
             }
@@ -112,7 +113,7 @@ namespace Signal.Tests
             var abortCalled = false;
 
             signalProcessorOne.OnProcess = (s, c) => { throw new Exception(); };
-            signalProcessorOne.OnProcessAbort = (s, c) => { abortCalled = true; };
+            signalProcessorOne.OnProcessAbort = (s, c , t) => { abortCalled = true; };
 
 
             var target = new SignalProcessor(new ISignalHandler[] { signalProcessorOne, signalProcessorTwo });
@@ -129,6 +130,36 @@ namespace Signal.Tests
 
             // assert
             Assert.IsTrue(abortCalled);
+
+        }
+
+        [TestMethod]
+        public async Task ExceptionsAreReported()
+        {
+            // arrange
+            var signal = new TestSignal();
+            var signalProcessorOne = new TestSignalHandlerOne();
+            var signalProcessorTwo = new TestSignalHandlerTwo();
+            Exception reportedException = null;
+
+            signalProcessorOne.OnProcess = (s, c) => { throw new Exception(); };
+            signalProcessorOne.OnProcessAbort = (s, c, t) => { reportedException = c.Exception; };
+
+
+            var target = new SignalProcessor(new ISignalHandler[] { signalProcessorOne, signalProcessorTwo });
+
+            // act 
+            try
+            {
+                await target.Process(signal, new CancellationToken());
+            }
+            catch
+            {
+
+            }
+
+            // assert
+            Assert.IsNotNull(reportedException);
 
         }
 
@@ -291,6 +322,34 @@ namespace Signal.Tests
             Assert.AreEqual(typeof(TestSignalHandlerTwo), workFlowValues[1]);
             Assert.AreEqual(typeof(TestSignalHandlerThree), workFlowValues[2]);
         }
+
+        [TestMethod]
+        public async Task SignalsMaySkipHandlersAsync()
+        {
+            // arrange
+            var signal = new TestSignal
+            {
+                HandlersToSkip = new[] { typeof(TestSignalHandlerTwo) }
+            };
+            var signalProcessorOne = new TestSignalHandlerOne();
+            var signalProcessorTwo = new TestSignalHandlerTwo();
+            var signalProcessorThree = new TestSignalHandlerThree();
+
+
+            var target = new SignalProcessor(
+                new ISignalHandler[] { signalProcessorOne, signalProcessorTwo, signalProcessorThree });
+
+            // act 
+            await target.Process(signal, new CancellationToken());
+
+
+            // assert
+            Assert.IsNotNull(signalProcessorOne.SignalRecieved);
+            Assert.IsNull(signalProcessorTwo.SignalRecieved);
+            Assert.IsNotNull(signalProcessorThree.SignalRecieved);
+
+
+        }
     }
 
 
@@ -298,7 +357,6 @@ namespace Signal.Tests
 
     public class TestSignal : Signals.Signal
     {
-
     }
 
     public abstract class TestSignalHandler : SignalHandler<TestSignal>
@@ -311,7 +369,7 @@ namespace Signal.Tests
         public bool IsFirst { get; private set; }
         public bool IsLast { get; private set; }
         public Action<ISignal, CancellationToken> OnProcess { get; set; } = (s, t) => { };
-        public Action<ISignal, CancellationToken> OnProcessAbort { get; set; } = (s, t) => { };
+        public Action<ISignal, ISignalContext, CancellationToken> OnProcessAbort { get; set; } = (s, c, t) => {  };
 
         protected override Task OnSignal(TestSignal signal, ISignalContext context, CancellationToken token)
         {
@@ -325,7 +383,7 @@ namespace Signal.Tests
 
         protected override Task OnSignalAbort(TestSignal signal, ISignalContext context, CancellationToken token)
         {
-            OnProcessAbort(signal, token);
+            OnProcessAbort(signal, context, token);
             return Task.CompletedTask;
         }
     }
@@ -346,7 +404,7 @@ namespace Signal.Tests
         }
 
         public override Task ProcessEnd(ISignal signal, CancellationToken token)
-        {
+        {            
             ProcessEndSignal = signal;
             return Task.CompletedTask;
         }

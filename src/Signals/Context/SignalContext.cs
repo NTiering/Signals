@@ -16,6 +16,6 @@ namespace Signals.Context
         public bool IsLast => WorkFlow.Any() && WorkFlow.Count() - 1 == StepCount;
         public IEnumerable<Type> WorkFlow { get; }
         public int StepCount { get; internal set; }
-
+        public Exception Exception { get; internal set; }
     }
 }
