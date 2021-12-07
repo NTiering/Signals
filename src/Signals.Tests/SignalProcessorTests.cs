@@ -5,6 +5,7 @@ using Signals.Handlers;
 using Signals.Pipelines;
 using Signals.Processor;
 using System;
+using System.Collections;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -291,6 +292,34 @@ namespace Signal.Tests
             Assert.AreEqual(typeof(TestSignalHandlerTwo), workFlowValues[1]);
             Assert.AreEqual(typeof(TestSignalHandlerThree), workFlowValues[2]);
         }
+
+        [TestMethod]
+        public async Task SignalsMaySkipHandlersAsync()
+        {
+            // arrange
+            var signal = new TestSignal
+            {
+                HandlersToSkip = new[] { typeof(TestSignalHandlerTwo) }
+            };
+            var signalProcessorOne = new TestSignalHandlerOne();
+            var signalProcessorTwo = new TestSignalHandlerTwo();
+            var signalProcessorThree = new TestSignalHandlerThree();
+
+
+            var target = new SignalProcessor(
+                new ISignalHandler[] { signalProcessorOne, signalProcessorTwo, signalProcessorThree });
+
+            // act 
+            await target.Process(signal, new CancellationToken());
+
+
+            // assert
+            Assert.IsNotNull(signalProcessorOne.SignalRecieved);
+            Assert.IsNull(signalProcessorTwo.SignalRecieved);
+            Assert.IsNotNull(signalProcessorThree.SignalRecieved);
+
+
+        }
     }
 
 
@@ -298,7 +327,6 @@ namespace Signal.Tests
 
     public class TestSignal : Signals.Signal
     {
-
     }
 
     public abstract class TestSignalHandler : SignalHandler<TestSignal>

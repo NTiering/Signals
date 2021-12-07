@@ -74,6 +74,11 @@ namespace Signals.Processor
 
             foreach (var handler in handlers)
             {
+                if (signal.HandlersToSkip != null && signal.HandlersToSkip.Contains(handler.GetType()))
+                {
+                    continue;
+                }
+
                 ran.Add(handler);
                 try
                 {
