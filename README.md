@@ -1,6 +1,6 @@
 # Signals
 
-Siganal is a simple to use pub-sub framework. It is designed to allow you to separate concerns easily 
+Signals is a simple to use pub-sub framework. It is designed to allow you to separate concerns easily 
 
 ## Installation
 
