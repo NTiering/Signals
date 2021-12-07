@@ -9,5 +9,6 @@ namespace Signals.Context
         bool IsLast { get; }
         int StepCount { get; }
         IEnumerable<Type> WorkFlow { get; }
+        Exception Exception { get; }
     }
 }
