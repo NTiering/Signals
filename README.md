@@ -90,7 +90,6 @@ public class LoggingPipelineHandler : PipelineHandler
         
     public override Task ProcessStart(ISignal signal, CancellationToken token)
     {
-        ProcessStartSignal = signal;
         Console.WriteLine("signal processing started");
         return Task.CompletedTask;
     }
