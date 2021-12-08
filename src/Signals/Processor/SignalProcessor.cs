@@ -39,39 +39,41 @@ namespace Signals.Processor
             if (signal == null) throw new ArgumentNullException(nameof(signal));
             if (NoHandlersPresent<T>()) throw new InvalidOperationException($"No handlers found for Type of {typeof(T).FullName}");
 
-            await RunStartPipelineHandlers(signal, token);
-            await RunSignalProcessors(signal, token);
-            await RunEndPipelineHandlers(signal, token);
+            var handlers = signalHandlers[typeof(T)];
+            var context = new SignalContext(handlers.Select(x => x.GetType()));
+
+            await RunStartPipelineHandlers(signal, context, token);
+            await RunSignalProcessors(signal, context, token);
+            await RunEndPipelineHandlers(signal, context, token);
+
+            if (context.Exception != null) throw context.Exception;
 
             return signal;
         }
 
-        private async Task RunStartPipelineHandlers<T>(T signal, CancellationToken token) where T : ISignal
-        {
-
-            if (pipelineHandlers.Empty()) return;
-            foreach (var handler in pipelineHandlers)
-            {
-                await handler.ProcessStart(signal, token);
-            }
-        }
-
-        private async Task RunEndPipelineHandlers<T>(T signal, CancellationToken token) where T : ISignal
+        private async Task RunStartPipelineHandlers<T>(T signal, SignalContext context, CancellationToken token) where T : ISignal
         {
             if (pipelineHandlers.Empty()) return;
             foreach (var handler in pipelineHandlers)
             {
-                await handler.ProcessEnd(signal, token);
+                await handler.ProcessStart(signal, context, token);
             }
         }
 
-        private async Task RunSignalProcessors<T>(T signal, CancellationToken token) where T : ISignal
+        private async Task RunEndPipelineHandlers<T>(T signal, SignalContext context, CancellationToken token) where T : ISignal
+        {
+            if (pipelineHandlers.Empty()) return;
+            foreach (var handler in pipelineHandlers)
+            {
+                await handler.ProcessEnd(signal, context, token);
+            }
+        }
+
+        private async Task RunSignalProcessors<T>(T signal, SignalContext context, CancellationToken token) where T : ISignal
         {
             var handlers = signalHandlers[typeof(T)];
             var ran = new List<ISignalHandler>();
-            Exception exception = null;
-            var context = new SignalContext(handlers.Select(x => x.GetType()));
-
+         
             foreach (var handler in handlers)
             {
                 if (signal.HandlersToSkip.OrEmpty().Contains(handler.GetType()))
@@ -88,20 +90,18 @@ namespace Signals.Processor
                 }
                 catch (Exception ex)
                 {
-                    exception = ex;
+                    context.Exception = ex;
                     break;
                 }
             }
 
-            if (exception == null) return;
-            context.Exception = exception;
+            if (context.Exception == null) return;
             ran.Reverse();
             foreach (var handler in ran)
             {
                 await handler.ProcessAbort(signal, context, token);
             }
 
-            throw exception;
         }
 
         private bool NoHandlersPresent<T>()
