@@ -32,6 +32,7 @@ namespace Signals.Processor
         {
             return await Process(signal, new CancellationToken());
         }
+
         public async Task<T> Process<T>(T signal , CancellationToken token) where T : ISignal
         {            
             if (signal == null) throw new ArgumentNullException(nameof(signal));
@@ -52,7 +53,6 @@ namespace Signals.Processor
 
             return signal;            
         }
-
         
 
         private bool NoHandlersPresent<T>()
