@@ -34,33 +34,25 @@ namespace Signals.Processor
         }
 
         public async Task<T> Process<T>(T signal , CancellationToken token) where T : ISignal
-        {            
-            if (signal == null) throw new ArgumentNullException(nameof(signal));
-            if (NoHandlersPresent<T>()) throw new InvalidOperationException($"No handlers found for Type of {typeof(T).FullName}");
-       
+        {
             var handlers = signalHandlers[typeof(T)];
+
+            if (signal == null) throw new ArgumentNullException(nameof(signal));
+            if (handlers.IsEmpty())throw new InvalidOperationException($"No handlers found for Type of {typeof(T).FullName}");
+            
             var context = new SignalContext(handlers.Select(x => x.GetType()));
 
             await pipelineHandlers.RunStartPipelineHandlers(signal, context, token);
             var handlersRan = await handlers.RunSignalProcessors(signal, context, token);
-            if (context.HasException)
-            {
-                await handlersRan.AbortSignalProcessors(signal, context, token);
-            }
+            if (context.HasException) await handlersRan.AbortSignalProcessors(signal, context, token);
             await pipelineHandlers.RunEndPipelineHandlers(signal, context, token);
 
             if (context.HasException) throw context.Exception;
 
-            return signal;            
+            return signal;
         }
+
         
-
-        private bool NoHandlersPresent<T>()
-        {
-            var rtn = !signalHandlers.Keys.Contains(typeof(T));
-            return rtn;
-        }
-
         private static IDictionary<Type, ISignalHandler[]> GetSignalHandlers(IEnumerable<ISignalHandler> handlers)
         {
             var rtn = new Dictionary<Type, ISignalHandler[]>();

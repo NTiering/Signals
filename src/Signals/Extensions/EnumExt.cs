@@ -22,7 +22,7 @@ namespace Signals.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="collection"></param>
         /// <returns></returns>
-        public static bool Empty<T>(this IEnumerable<T> collection)
+        public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             return collection == null || collection.Any() == false;
         }

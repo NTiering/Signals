@@ -7,9 +7,9 @@ namespace Signals.Context
 {
     internal class SignalContext : ISignalContext
     {
-        public SignalContext(IEnumerable<Type> WorkFlow)
+        public SignalContext(IEnumerable<Type> workFlow)
         {
-            this.WorkFlow = WorkFlow.OrEmpty();
+            this.WorkFlow = workFlow.OrEmpty();
         }
 
         public bool IsFirst => StepCount == 0;
