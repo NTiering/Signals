@@ -17,5 +17,6 @@ namespace Signals.Context
         public IEnumerable<Type> WorkFlow { get; }
         public int StepCount { get; internal set; }
         public Exception Exception { get; internal set; }
+        public bool HasException => Exception != null;
     }
 }

@@ -134,7 +134,7 @@ namespace Signal.Tests
         }
 
         [TestMethod]
-        public async Task ExceptionCallspipelineHandlers()
+        public async Task ExceptionCallsPipelineHandlers()
         {
             // arrange
             var signal = new TestSignal();
