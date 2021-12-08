@@ -88,13 +88,13 @@ public class BookDetailsLoggerHandler : SignalHandler<BookDetailSignal>
 public class LoggingPipelineHandler : PipelineHandler
 {
         
-    public override Task ProcessStart(ISignal signal, CancellationToken token)
+    public override Task ProcessStart(ISignal signal, ISignalContext context,CancellationToken token)
     {
         Console.WriteLine("signal processing started");
         return Task.CompletedTask;
     }
 
-    public override Task ProcessEnd(ISignal signal, CancellationToken token)
+    public override Task ProcessEnd(ISignal signal, ISignalContext context,CancellationToken token)
     {
         Console.WriteLine("signal processing ended");        
         return Task.CompletedTask;
