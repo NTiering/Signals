@@ -16,13 +16,13 @@ jobs:
     - name: step-1
       shell: bash
       run: |
-          echo " ls-l"
+          echo " $ls-l"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore ./Signals/src/Signals.sln 
+      run: dotnet restore ././Signals/src/Signals.sln 
     - name: Build
       run: dotnet build ../../Signals/src/Signals.sln   --no-restore
     - name: Test
