@@ -113,7 +113,7 @@ namespace Signal.Tests
             var abortCalled = false;
 
             signalProcessorOne.OnProcess = (s, c) => { throw new Exception(); };
-            signalProcessorOne.OnProcessAbort = (s, c , t) => { abortCalled = true; };
+            signalProcessorOne.OnProcessAbort = (s, c, t) => { abortCalled = true; };
 
 
             var target = new SignalProcessor(new ISignalHandler[] { signalProcessorOne, signalProcessorTwo });
@@ -130,6 +130,36 @@ namespace Signal.Tests
 
             // assert
             Assert.IsTrue(abortCalled);
+
+        }
+
+        [TestMethod]
+        public async Task ExceptionCallspipelineHandlers()
+        {
+            // arrange
+            var signal = new TestSignal();
+            var signalProcessorOne = new TestSignalHandlerOne();
+            var signalProcessorTwo = new TestSignalHandlerTwo();
+            var pipelineHandler = new TestPipelineHandler();
+            signalProcessorTwo.OnProcess = (s, c) => { throw new Exception(); };
+
+
+            var target = new SignalProcessor(new ISignalHandler[] { signalProcessorOne, signalProcessorTwo },
+                new[] {pipelineHandler});
+
+            // act 
+            try
+            {
+                await target.Process(signal, new CancellationToken());
+            }
+            catch
+            {
+
+            }
+
+            // assert
+            Assert.IsNotNull(pipelineHandler.ProcessEndContext);
+            Assert.IsNotNull(pipelineHandler.ProcessEndContext.Exception);
 
         }
 
@@ -395,17 +425,21 @@ namespace Signal.Tests
     public class TestPipelineHandler : PipelineHandler
     {
         public ISignal ProcessStartSignal { get; private set; }
+        public ISignalContext ProcessStartContext { get; private set; }
         public ISignal ProcessEndSignal { get; private set; }
+        public ISignalContext ProcessEndContext { get; private set; }
 
-        public override Task ProcessStart(ISignal signal, CancellationToken token)
+        public override Task ProcessStart(ISignal signal, ISignalContext context, CancellationToken token)
         {
             ProcessStartSignal = signal;
+            ProcessStartContext = context;
             return Task.CompletedTask;
         }
 
-        public override Task ProcessEnd(ISignal signal, CancellationToken token)
+        public override Task ProcessEnd(ISignal signal, ISignalContext context, CancellationToken token)
         {            
             ProcessEndSignal = signal;
+            ProcessEndContext = context;
             return Task.CompletedTask;
         }
     }
