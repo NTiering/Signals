@@ -10,9 +10,11 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    steps:
+    
+    steps:    
     - uses: actions/checkout@v2
+    - name: step-1
+      run: echo "${JOBENV}"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
