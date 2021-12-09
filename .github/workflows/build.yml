@@ -16,7 +16,7 @@ jobs:
     - name: step-1
       shell: bash
       run: |
-          echo "GH_REPO: $GH_REPO"
+          echo "RUNNER_NAME: $RUNNER_NAME"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
