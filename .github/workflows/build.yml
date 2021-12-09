@@ -16,7 +16,7 @@ jobs:
     - name: step-1
       shell: bash
       run: |
-          echo "RUNNER_NAME: $RUNNER_NAME"
+          echo "GITHUB_PATH: $GITHUB_PATH"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
