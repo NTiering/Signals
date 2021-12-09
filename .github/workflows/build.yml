@@ -16,7 +16,7 @@ jobs:
     - name: step-1
       shell: bash
       run: |
-          echo "GITHUB_PATH: $GITHUB_PATH"
+          echo " ls-l"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
