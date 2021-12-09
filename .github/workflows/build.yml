@@ -14,8 +14,8 @@ jobs:
     steps:    
     - uses: actions/checkout@v2
     - name: Info block
-      run: echo "============= $GITHUB_REF_NAME ============="     
-   - name: Setup .NET
+      run: echo "============= $GITHUB_REF_NAME ============="
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
