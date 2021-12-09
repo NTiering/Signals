@@ -14,7 +14,7 @@ jobs:
     steps:    
     - uses: actions/checkout@v2
     - name: Info block
-      run: echo "GITHUB_REF_NAME = $GITHUB_REF_NAME"
+      run: echo "Source Branch $GITHUB_REF_NAME"
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
